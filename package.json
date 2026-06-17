@@ -1,0 +1,62 @@
+{
+  "name": "@checkdigit/public-library-template",
+  "version": "0.0.1",
+  "description": "A short description of the intended use of the library",
+  "homepage": "https://github.com/checkdigit/public-library-template#readme",
+  "bugs": {
+    "url": "https://github.com/checkdigit/public-library-template/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/checkdigit/public-library-template.git"
+  },
+  "license": "MIT",
+  "author": "Check Digit, LLC",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist-mjs/index.mjs",
+      "default": "./dist-mjs/index.mjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist-types",
+    "dist-mjs",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts",
+    "!dist-types/**/*.test.d.ts",
+    "!dist-types/**/*.spec.d.ts",
+    "!dist-mjs/**/*.test.mjs",
+    "!dist-mjs/**/*.spec.mjs",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "build:dist-mjs": "rimraf dist-mjs && npx builder --type=module --sourceMap --outDir=dist-mjs && node dist-mjs/index.mjs",
+    "build:dist-types": "rimraf dist-types && npx builder --type=types --outDir=dist-types",
+    "ci:compile": "tsc --noEmit",
+    "ci:coverage": "rimraf coverage && mkdir coverage && node --test-timeout 600000 --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info --test \"src/**/*.spec.ts\"",
+    "ci:lint": "npm run lint",
+    "ci:style": "npm run prettier",
+    "ci:test": "node --test-timeout 600000 --test \"src/**/*.spec.ts\"",
+    "coverage": "node --test-timeout 600000 --experimental-test-coverage --test \"src/**/*.spec.ts\"",
+    "lint": "eslint --max-warnings 0 .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "npm run build:dist-types && npm run build:dist-mjs",
+    "prettier": "prettier --ignore-path .gitignore --list-different .",
+    "prettier:fix": "prettier --ignore-path .gitignore --write .",
+    "test": "npm run ci:compile && npm run ci:test && npm run ci:lint && npm run ci:style"
+  },
+  "prettier": "@checkdigit/prettier-config",
+  "devDependencies": {
+    "@checkdigit/eslint-config": "^11.6.2",
+    "@checkdigit/prettier-config": "^8.0.0",
+    "@checkdigit/typescript-config": "^10.0.1",
+    "rimraf": "^6.1.3"
+  },
+  "engines": {
+    "node": ">=24.14.1"
+  }
+}
