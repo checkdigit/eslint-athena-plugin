@@ -445,7 +445,10 @@ WHEN 1=1\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'service not found: "non-existent" (no swagger schema located)' },
+          data: {
+            errorMessage:
+              'service not found: "non-existent" (no swagger schema located)',
+          },
           line: 1,
           column: 18,
           endLine: 1,
@@ -487,7 +490,9 @@ WHEN 1=1\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin` },
+          data: {
+            errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin`,
+          },
           line: 1,
           column: 9,
           endLine: 1,
@@ -643,7 +648,8 @@ AND (
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -682,7 +688,8 @@ WHERE method = 'PUT'
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.nonExistentField"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.nonExistentField"',
           },
         },
       ],
@@ -716,7 +723,10 @@ WHERE method = 'PUT'
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
+          data: {
+            errorMessage:
+              'Column "responsebody" has no property at path "$.nonExistentField"',
+          },
           line: 1,
           column: 9,
           endLine: 1,
@@ -736,7 +746,10 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
+          data: {
+            errorMessage:
+              'Column "responsebody" has no property at path "$.nonExistentField"',
+          },
           line: 2,
           column: 3,
           endLine: 2,
@@ -758,7 +771,10 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
+          data: {
+            errorMessage:
+              'Column "responsebody" has no property at path "$.nonExistentField"',
+          },
           line: 1,
           column: 14,
           endLine: 1,
@@ -798,7 +814,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -820,7 +837,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -853,7 +871,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -870,7 +889,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -888,7 +908,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -905,7 +926,8 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],

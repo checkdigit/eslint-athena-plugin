@@ -25,8 +25,15 @@ function col(name: string, schema: v3.SchemaObject): ResolvedColumn {
   return { name, schema };
 }
 
-function bodySchema(envelope: SchemaObject, field: 'body' | 'headers'): v3.SchemaObject {
-  return (envelope as Record<string, Record<string, v3.SchemaObject>>)['properties']?.[field] ?? SCHEMA_OBJECT;
+function bodySchema(
+  envelope: SchemaObject,
+  field: 'body' | 'headers',
+): v3.SchemaObject {
+  return (
+    (envelope as Record<string, Record<string, v3.SchemaObject>>)[
+      'properties'
+    ]?.[field] ?? SCHEMA_OBJECT
+  );
 }
 
 /**
@@ -34,7 +41,10 @@ function bodySchema(envelope: SchemaObject, field: 'body' | 'headers'): v3.Schem
  * Multiple operations may match (e.g. GET + POST for the same service), so the
  * caller receives an array and stores all of them under the same table name.
  */
-export function buildServiceTables(tableName: string, operations: MatchedOperation[]): ResolvedTable[] {
+export function buildServiceTables(
+  tableName: string,
+  operations: MatchedOperation[],
+): ResolvedTable[] {
   return operations.map((operation) => ({
     name: tableName,
     apiOperation: [operation],
@@ -43,13 +53,25 @@ export function buildServiceTables(tableName: string, operations: MatchedOperati
       ['started', [col('started', SCHEMA_STRING)]],
       ['ended', [col('ended', SCHEMA_STRING)]],
       ['url', [col('url', SCHEMA_STRING)]],
-      ['requestbody', [col('requestbody', bodySchema(operation.request, 'body'))]],
-      ['requestheaders', [col('requestheaders', bodySchema(operation.request, 'headers'))]],
+      [
+        'requestbody',
+        [col('requestbody', bodySchema(operation.request, 'body'))],
+      ],
+      [
+        'requestheaders',
+        [col('requestheaders', bodySchema(operation.request, 'headers'))],
+      ],
       ['responsestatus', [col('responsestatus', SCHEMA_STRING)]],
       ['responsemessage', [col('responsemessage', SCHEMA_STRING)]],
       ['responsetype', [col('responsetype', SCHEMA_STRING)]],
-      ['responsebody', [col('responsebody', bodySchema(operation.response, 'body'))]],
-      ['responseheaders', [col('responseheaders', bodySchema(operation.response, 'headers'))]],
+      [
+        'responsebody',
+        [col('responsebody', bodySchema(operation.response, 'body'))],
+      ],
+      [
+        'responseheaders',
+        [col('responseheaders', bodySchema(operation.response, 'headers'))],
+      ],
       ['partition_date', [col('partition_date', SCHEMA_STRING)]],
     ]),
   }));

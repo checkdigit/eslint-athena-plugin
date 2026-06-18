@@ -11,7 +11,9 @@ import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
 const ignores = [
-  ...(await fs.readFile('.gitignore', 'utf-8')).split('\n').filter((path) => path.trim() !== ''),
+  ...(await fs.readFile('.gitignore', 'utf-8'))
+    .split('\n')
+    .filter((path) => path.trim() !== ''),
   'eslint.config.mjs',
   'ts-init/**/*',
 ];

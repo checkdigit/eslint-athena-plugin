@@ -67,7 +67,11 @@ export interface VisitorMap {
 // -------------------------------------------------------------------
 
 function hasNodeType(node: unknown, type: string): boolean {
-  return typeof node === 'object' && node !== null && (node as { type?: unknown }).type === type;
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    (node as { type?: unknown }).type === type
+  );
 }
 
 export function isUnnestFrom(node: unknown): node is UnnestFrom {
@@ -94,7 +98,13 @@ export function isTableExpr(node: unknown): node is TableExpr {
 }
 
 function isRegularFromItem(node: unknown): boolean {
-  return typeof node === 'object' && node !== null && !isUnnestFrom(node) && !isDual(node) && !isTableExpr(node);
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    !isUnnestFrom(node) &&
+    !isDual(node) &&
+    !isTableExpr(node)
+  );
 }
 
 export function isJoin(node: unknown): node is Join {
@@ -102,7 +112,9 @@ export function isJoin(node: unknown): node is Join {
 }
 
 export function isBaseFrom(node: unknown): node is BaseFrom {
-  return isRegularFromItem(node) && !isJoin(node) && 'table' in (node as object);
+  return (
+    isRegularFromItem(node) && !isJoin(node) && 'table' in (node as object)
+  );
 }
 
 export function hasArrayIndex(node: ColumnRefItem): node is ColumnRefWithIndex {
@@ -373,7 +385,8 @@ function containsCastToType(expr: unknown, dataType: 'ARRAY' | 'MAP'): boolean {
   let found = false;
   walkExpr(expr, {
     visitCast(node) {
-      const target = (node as unknown as { target?: { dataType?: string }[] }).target?.[0];
+      const target = (node as unknown as { target?: { dataType?: string }[] })
+        .target?.[0];
       if (target?.dataType === dataType) {
         found = true;
       }

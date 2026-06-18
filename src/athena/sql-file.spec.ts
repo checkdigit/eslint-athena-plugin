@@ -102,7 +102,10 @@ WHEN 1=1`,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'service not found: "non-existent" (no swagger schema located)' },
+          data: {
+            errorMessage:
+              'service not found: "non-existent" (no swagger schema located)',
+          },
           line: 1,
           column: 17,
           endLine: 1,
@@ -147,7 +150,9 @@ WHEN 1=1`,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin` },
+          data: {
+            errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin`,
+          },
         },
       ],
     },

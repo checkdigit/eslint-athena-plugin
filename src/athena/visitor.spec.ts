@@ -71,7 +71,10 @@ describe('visitor walk()', () => {
         visited.push(1);
       },
     };
-    walk({ type: 'binary_expr', operator: '=', left: null, right: null }, visitor);
+    walk(
+      { type: 'binary_expr', operator: '=', left: null, right: null },
+      visitor,
+    );
     assert.equal(visited.length, 0);
   });
 });
@@ -79,7 +82,12 @@ describe('visitor walk()', () => {
 describe('visitor extractors', () => {
   const colRefExpr = {
     type: 'expr',
-    expr: { type: 'column_ref', table: 'l', column: 'responseheaders', collate: null },
+    expr: {
+      type: 'column_ref',
+      table: 'l',
+      column: 'responseheaders',
+      collate: null,
+    },
     as: 'x',
   };
 
@@ -91,7 +99,12 @@ describe('visitor extractors', () => {
       args: {
         type: 'expr_list',
         value: [
-          { type: 'column_ref', table: null, column: 'responsebody', collate: null },
+          {
+            type: 'column_ref',
+            table: null,
+            column: 'responsebody',
+            collate: null,
+          },
           { type: 'single_quote_string', value: '$.name' },
         ],
       },
@@ -128,7 +141,9 @@ describe('visitor extractors', () => {
         column: 'posting',
         collate: null,
         // eslint-disable-next-line camelcase
-        array_index: [{ brackets: true, index: { type: 'string', value: 'accountId' } }],
+        array_index: [
+          { brackets: true, index: { type: 'string', value: 'accountId' } },
+        ],
       },
       as: null,
     };

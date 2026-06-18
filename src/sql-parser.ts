@@ -16,7 +16,10 @@ interface SqlParseResult {
     body: never[];
     sourceType: 'module';
     range: [number, number];
-    loc: { start: { line: number; column: number }; end: { line: number; column: number } };
+    loc: {
+      start: { line: number; column: number };
+      end: { line: number; column: number };
+    };
     tokens: never[];
     comments: never[];
   };
@@ -35,7 +38,10 @@ export function parseForESLint(code: string): SqlParseResult {
       range: [0, code.length],
       loc: {
         start: { line: 1, column: 0 },
-        end: { line: lines.length, column: lines[lines.length - 1]?.length ?? 0 },
+        end: {
+          line: lines.length,
+          column: lines[lines.length - 1]?.length ?? 0,
+        },
       },
       tokens: [],
       comments: [],

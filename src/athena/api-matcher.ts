@@ -22,14 +22,20 @@ export interface MatchedOperation {
 }
 
 // A predicate over an API operation candidate: (url path, HTTP method, HTTP response code)
-type OperationPredicate = (path: string, method: string, responseCode: string) => boolean;
+type OperationPredicate = (
+  path: string,
+  method: string,
+  responseCode: string,
+) => boolean;
 
 const ALWAYS_TRUE: OperationPredicate = () => true;
 
 // --- AST accessor helpers (use Record<string,unknown> to avoid TypeScript narrowing conflicts) ---
 
 function rec(node: unknown): Record<string, unknown> | undefined {
-  return typeof node === 'object' && node !== null ? (node as Record<string, unknown>) : undefined;
+  return typeof node === 'object' && node !== null
+    ? (node as Record<string, unknown>)
+    : undefined;
 }
 
 function getFunctionName(node: unknown): string | undefined {
@@ -66,15 +72,21 @@ function getStringValue(node: unknown): string | undefined {
 
 function getNumberValue(node: unknown): number | undefined {
   const val = rec(node);
-  return val?.['type'] === 'number' && typeof val['value'] === 'number' ? val['value'] : undefined;
+  return val?.['type'] === 'number' && typeof val['value'] === 'number'
+    ? val['value']
+    : undefined;
 }
 
 // Returns the function args when the node is split(url, '/') or split_part(url, '/'), else undefined.
-function getSplitUrlFunctionArgs(node: unknown, functionName: 'split' | 'split_part'): unknown[] | undefined {
+function getSplitUrlFunctionArgs(
+  node: unknown,
+  functionName: 'split' | 'split_part',
+): unknown[] | undefined {
   if (getFunctionName(node) !== functionName) {
     return undefined;
   }
-  const args = (rec(node)?.['args'] as { value?: unknown[] } | undefined)?.value;
+  const args = (rec(node)?.['args'] as { value?: unknown[] } | undefined)
+    ?.value;
   if (!Array.isArray(args) || args.length < 2) {
     return undefined;
   }
@@ -93,7 +105,10 @@ function isSplitUrlIndexed(node: unknown): node is SplitUrlIndexed {
     return false;
   }
   const fn = rec(node);
-  return Array.isArray(fn?.['array_index']) && (fn['array_index'] as unknown[]).length > 0;
+  return (
+    Array.isArray(fn?.['array_index']) &&
+    (fn['array_index'] as unknown[]).length > 0
+  );
 }
 
 // Matches: split_part(url, '/', N)  — Presto-style, index in args[2] (1-based)
@@ -107,7 +122,8 @@ function isCardinalitySplitUrl(node: unknown): node is SqlFunction {
   if (getFunctionName(node) !== 'cardinality') {
     return false;
   }
-  const outerArgs = (rec(node)?.['args'] as { value?: unknown[] } | undefined)?.value;
+  const outerArgs = (rec(node)?.['args'] as { value?: unknown[] } | undefined)
+    ?.value;
   if (!Array.isArray(outerArgs) || outerArgs.length === 0) {
     return false;
   }
@@ -122,14 +138,18 @@ function getConditionTableQualifier(left: unknown): string | undefined {
     return getColumnTable(left);
   }
 
-  const splitArgs = getSplitUrlFunctionArgs(left, 'split') ?? getSplitUrlFunctionArgs(left, 'split_part');
+  const splitArgs =
+    getSplitUrlFunctionArgs(left, 'split') ??
+    getSplitUrlFunctionArgs(left, 'split_part');
   if (splitArgs !== undefined) {
     return getColumnTable(splitArgs[0]);
   }
   if (isCardinalitySplitUrl(left)) {
-    const outerArgs = (rec(left)?.['args'] as { value?: unknown[] } | undefined)?.value;
+    const outerArgs = (rec(left)?.['args'] as { value?: unknown[] } | undefined)
+      ?.value;
     const splitFn = rec(outerArgs?.[0]);
-    const innerArgs = (splitFn?.['args'] as { value?: unknown[] } | undefined)?.value;
+    const innerArgs = (splitFn?.['args'] as { value?: unknown[] } | undefined)
+      ?.value;
     return getColumnTable(innerArgs?.[0]);
   }
   return undefined;
@@ -139,7 +159,10 @@ function getConditionTableQualifier(left: unknown): string | undefined {
 
 // Builds a predicate that checks whether the Nth path segment (1-based) equals a fixed value.
 // Path parameters (`:param`) are treated as wildcards and always match.
-function buildPathSegmentPredicate(index: number, value: string): OperationPredicate {
+function buildPathSegmentPredicate(
+  index: number,
+  value: string,
+): OperationPredicate {
   return (path) => {
     const part = path.split('/')[index - 1];
     log('checking path segment', { path, index, part, value });
@@ -149,7 +172,10 @@ function buildPathSegmentPredicate(index: number, value: string): OperationPredi
 
 // tableAlias: the alias (or undefined if none) of the FROM-clause item we are currently matching.
 // Conditions that explicitly reference a different alias are skipped (treated as ALWAYS_TRUE).
-function buildLeafPredicate(node: Binary, tableAlias: string | undefined): OperationPredicate | undefined {
+function buildLeafPredicate(
+  node: Binary,
+  tableAlias: string | undefined,
+): OperationPredicate | undefined {
   if (node.operator !== '=') {
     return undefined;
   }
@@ -158,7 +184,11 @@ function buildLeafPredicate(node: Binary, tableAlias: string | undefined): Opera
   const conditionTable = getConditionTableQualifier(left);
   // conditionTable === undefined → unqualified or indeterminate, applies to all tables
   // conditionTable === string   → qualified; skip if it names a different alias
-  if (conditionTable !== undefined && tableAlias !== undefined && conditionTable !== tableAlias) {
+  if (
+    conditionTable !== undefined &&
+    tableAlias !== undefined &&
+    conditionTable !== tableAlias
+  ) {
     return undefined;
   }
 
@@ -189,7 +219,9 @@ function buildLeafPredicate(node: Binary, tableAlias: string | undefined): Opera
 
   // split_part(url, '/', N) = 'value'
   if (isSplitPartUrl(left)) {
-    const index = getNumberValue(getSplitUrlFunctionArgs(left, 'split_part')?.[2]);
+    const index = getNumberValue(
+      getSplitUrlFunctionArgs(left, 'split_part')?.[2],
+    );
     const value = getStringValue(right);
     if (index !== undefined && value !== undefined) {
       return buildPathSegmentPredicate(index, value);
@@ -207,7 +239,10 @@ function buildLeafPredicate(node: Binary, tableAlias: string | undefined): Opera
   return undefined;
 }
 
-function buildPredicate(expr: unknown, tableAlias: string | undefined): OperationPredicate {
+function buildPredicate(
+  expr: unknown,
+  tableAlias: string | undefined,
+): OperationPredicate {
   const node = rec(expr);
   if (node?.['type'] !== 'binary_expr') {
     return ALWAYS_TRUE;
@@ -219,12 +254,14 @@ function buildPredicate(expr: unknown, tableAlias: string | undefined): Operatio
     case 'AND': {
       const leftPred = buildPredicate(binary.left, tableAlias);
       const rightPred = buildPredicate(binary.right, tableAlias);
-      return (path, method, code) => leftPred(path, method, code) && rightPred(path, method, code);
+      return (path, method, code) =>
+        leftPred(path, method, code) && rightPred(path, method, code);
     }
     case 'OR': {
       const leftPred = buildPredicate(binary.left, tableAlias);
       const rightPred = buildPredicate(binary.right, tableAlias);
-      return (path, method, code) => leftPred(path, method, code) || rightPred(path, method, code);
+      return (path, method, code) =>
+        leftPred(path, method, code) || rightPred(path, method, code);
     }
     case 'NOT': {
       const innerPred = buildPredicate(binary.left, tableAlias);
@@ -242,7 +279,10 @@ export function matchApi(
   apiSchemas: ApiSchemas[],
 ): MatchedOperation[] | undefined {
   const tableAlias = (tableAST as { as?: string | null }).as ?? undefined;
-  const predicate = buildPredicate((selectAST as { where?: unknown }).where, tableAlias);
+  const predicate = buildPredicate(
+    (selectAST as { where?: unknown }).where,
+    tableAlias,
+  );
 
   const allOperations: OperationToMatch[] = apiSchemas
     .flatMap((apiSchema) => Object.entries(apiSchema.apis))
@@ -255,12 +295,21 @@ export function matchApi(
     );
   log('total operation schemas', allOperations.length);
 
-  const matchedApis = allOperations.flatMap(({ path, method, operationSchemas }) =>
-    Object.entries(operationSchemas.responses).flatMap(([responseCode, responseSchema]) =>
-      predicate(path, method, responseCode)
-        ? [{ path, method, request: operationSchemas.request, response: responseSchema }]
-        : [],
-    ),
+  const matchedApis = allOperations.flatMap(
+    ({ path, method, operationSchemas }) =>
+      Object.entries(operationSchemas.responses).flatMap(
+        ([responseCode, responseSchema]) =>
+          predicate(path, method, responseCode)
+            ? [
+                {
+                  path,
+                  method,
+                  request: operationSchemas.request,
+                  response: responseSchema,
+                },
+              ]
+            : [],
+      ),
   );
   log('matched apis', matchedApis.length);
 

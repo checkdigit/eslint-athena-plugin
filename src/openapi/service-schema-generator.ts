@@ -29,7 +29,10 @@ interface ServiceSource {
 function derefApiSchemas(schemas: ApiSchemas): ApiSchemas {
   const definitions = schemas.definitions ?? {};
 
-  function derefValue(value: unknown, resolving: Set<string> = new Set<string>()): unknown {
+  function derefValue(
+    value: unknown,
+    resolving: Set<string> = new Set<string>(),
+  ): unknown {
     if (value === null || typeof value !== 'object') {
       return value;
     }
@@ -38,19 +41,30 @@ function derefApiSchemas(schemas: ApiSchemas): ApiSchemas {
     }
     const obj = value as Record<string, unknown>;
     if (typeof obj['$ref'] === 'string') {
-      const refName = /\/definitions\/(?<name>[^/]+)$/u.exec(obj['$ref'])?.groups?.['name'];
+      const refName = /\/definitions\/(?<name>[^/]+)$/u.exec(obj['$ref'])
+        ?.groups?.['name'];
       if (refName !== undefined && !resolving.has(refName)) {
-        return derefValue(definitions[refName], new Set<string>([...resolving, refName]));
+        return derefValue(
+          definitions[refName],
+          new Set<string>([...resolving, refName]),
+        );
       }
     }
-    return Object.fromEntries(Object.entries(obj).map(([key, val]) => [key, derefValue(val, resolving)]));
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, val]) => [
+        key,
+        derefValue(val, resolving),
+      ]),
+    );
   }
 
   const resolvedApis = derefValue(schemas.apis) as ApiSchemas['apis'];
   if (schemas.definitions !== undefined) {
     return {
       apis: resolvedApis,
-      definitions: derefValue(schemas.definitions) as NonNullable<ApiSchemas['definitions']>,
+      definitions: derefValue(schemas.definitions) as NonNullable<
+        ApiSchemas['definitions']
+      >,
     };
   }
   return { apis: resolvedApis };
@@ -60,22 +74,47 @@ function readServiceConfig(
   packageJsonContent: string,
   org: string,
   serviceName: string,
-): { organization: string; serviceName: string; apiRoot: string; endpoints: string[] } | undefined {
+):
+  | {
+      organization: string;
+      serviceName: string;
+      apiRoot: string;
+      endpoints: string[];
+    }
+  | undefined {
   const packageJson = JSON.parse(packageJsonContent) as {
     name?: string;
     service?: { api?: { root?: string; endpoints?: string[] } };
   };
   const apiRoot = packageJson.service?.api?.root;
   const apiEndpoints = packageJson.service?.api?.endpoints;
-  if (apiRoot === undefined || apiEndpoints === undefined || apiEndpoints.length === 0) {
+  if (
+    apiRoot === undefined ||
+    apiEndpoints === undefined ||
+    apiEndpoints.length === 0
+  ) {
     return undefined;
   }
-  const [pkgOrg = org, pkgServiceName = serviceName] = packageJson.name?.slice(1).split('/') ?? [];
-  return { organization: pkgOrg, serviceName: pkgServiceName, apiRoot, endpoints: apiEndpoints };
+  const [pkgOrg = org, pkgServiceName = serviceName] =
+    packageJson.name?.slice(1).split('/') ?? [];
+  return {
+    organization: pkgOrg,
+    serviceName: pkgServiceName,
+    apiRoot,
+    endpoints: apiEndpoints,
+  };
 }
 
-function findServiceLocally(serviceFolder: string, org: string, serviceName: string): ServiceSource | undefined {
-  const config = readServiceConfig(readFileSync(`${serviceFolder}/package.json`, 'utf-8'), org, serviceName);
+function findServiceLocally(
+  serviceFolder: string,
+  org: string,
+  serviceName: string,
+): ServiceSource | undefined {
+  const config = readServiceConfig(
+    readFileSync(`${serviceFolder}/package.json`, 'utf-8'),
+    org,
+    serviceName,
+  );
   if (config === undefined) {
     return undefined;
   }
@@ -84,42 +123,63 @@ function findServiceLocally(serviceFolder: string, org: string, serviceName: str
   for (const endpoint of config.endpoints) {
     const swaggerPath = `${serviceFolder}/${config.apiRoot}/${endpoint}/swagger.yml`;
     if (existsSync(swaggerPath)) {
-      endpoints.push({ path: endpoint, yamlContent: readFileSync(swaggerPath, 'utf-8') });
+      endpoints.push({
+        path: endpoint,
+        yamlContent: readFileSync(swaggerPath, 'utf-8'),
+      });
     }
   }
 
   if (endpoints.length > 0) {
-    return { organization: config.organization, serviceName: config.serviceName, endpoints };
+    return {
+      organization: config.organization,
+      serviceName: config.serviceName,
+      endpoints,
+    };
   }
   return undefined;
 }
 
 function findServiceInProject(serviceName: string): ServiceSource | undefined {
-  const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8')) as { name?: string };
+  const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
+    name?: string;
+  };
   const [org, projectName] = (packageJson.name ?? '').slice(1).split('/');
   if (org === undefined || projectName !== serviceName) {
     return undefined;
   }
-  log(`[schema-generator] '${serviceName}' is the current project, reading local swagger files`);
+  log(
+    `[schema-generator] '${serviceName}' is the current project, reading local swagger files`,
+  );
   return findServiceLocally('.', org, serviceName);
 }
 
-function findServiceInNodeModules(serviceName: string): ServiceSource | undefined {
+function findServiceInNodeModules(
+  serviceName: string,
+): ServiceSource | undefined {
   for (const org of ORGANIZATIONS) {
     const serviceFolder = `node_modules/@${org}/${serviceName}`;
     if (!existsSync(serviceFolder)) {
-      log(`[schema-generator] not found in node_modules: @${org}/${serviceName}`);
+      log(
+        `[schema-generator] not found in node_modules: @${org}/${serviceName}`,
+      );
       continue;
     }
     try {
-      log(`[schema-generator] found in node_modules: @${org}/${serviceName}, reading swagger files`);
+      log(
+        `[schema-generator] found in node_modules: @${org}/${serviceName}, reading swagger files`,
+      );
       const source = findServiceLocally(serviceFolder, org, serviceName);
       if (source !== undefined) {
         return source;
       }
-      log(`[schema-generator] no swagger schema inside node_modules/@${org}/${serviceName}`);
+      log(
+        `[schema-generator] no swagger schema inside node_modules/@${org}/${serviceName}`,
+      );
     } catch (error) {
-      log(`[schema-generator] error reading node_modules/@${org}/${serviceName}: ${errorMessageFromError(error)}`);
+      log(
+        `[schema-generator] error reading node_modules/@${org}/${serviceName}: ${errorMessageFromError(error)}`,
+      );
     }
   }
   return undefined;
@@ -131,7 +191,8 @@ export function generateSchemasForService(
 ): { schema: ApiSchemas; endpoint: string }[] {
   log(`[schema-generator] locating service '${serviceName}'`);
 
-  const source = findServiceInProject(serviceName) ?? findServiceInNodeModules(serviceName);
+  const source =
+    findServiceInProject(serviceName) ?? findServiceInNodeModules(serviceName);
   if (source === undefined) {
     log(
       `[schema-generator] '${serviceName}' not found — ensure it is listed as a devDependency or the repo is accessible via git`,
@@ -139,12 +200,18 @@ export function generateSchemasForService(
     return [];
   }
 
-  log(`[schema-generator] found '${serviceName}' (${source.endpoints.length.toString()} endpoint(s))`);
+  log(
+    `[schema-generator] found '${serviceName}' (${source.endpoints.length.toString()} endpoint(s))`,
+  );
 
   const results: { schema: ApiSchemas; endpoint: string }[] = [];
   for (const { path: endpoint, yamlContent } of source.endpoints) {
     try {
-      const rawSchema = buildApiSchemaFromYaml(yamlContent, source.organization, source.serviceName);
+      const rawSchema = buildApiSchemaFromYaml(
+        yamlContent,
+        source.organization,
+        source.serviceName,
+      );
       if (rawSchema === undefined) {
         continue;
       }
@@ -155,11 +222,18 @@ export function generateSchemasForService(
         const versionFolder = endpoint.split('/').at(-1) ?? endpoint;
         const dir = `${outputDir}/${versionFolder}`;
         mkdirSync(dir, { recursive: true });
-        writeFileSync(`${dir}/${SWAGGER_SCHEMA_DEREF_FILENAME}`, JSON.stringify(schema, undefined, 2));
-        log(`[schema-generator] cached schema to ${dir}/${SWAGGER_SCHEMA_DEREF_FILENAME}`);
+        writeFileSync(
+          `${dir}/${SWAGGER_SCHEMA_DEREF_FILENAME}`,
+          JSON.stringify(schema, undefined, 2),
+        );
+        log(
+          `[schema-generator] cached schema to ${dir}/${SWAGGER_SCHEMA_DEREF_FILENAME}`,
+        );
       }
     } catch (error) {
-      log(`[schema-generator] error processing endpoint ${endpoint}: ${errorMessageFromError(error)}`);
+      log(
+        `[schema-generator] error processing endpoint ${endpoint}: ${errorMessageFromError(error)}`,
+      );
     }
   }
 

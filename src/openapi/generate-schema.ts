@@ -15,8 +15,18 @@ export { generateSchemasForService } from './service-schema-generator.ts';
 
 const log = debug('openapi-cli:generate-schema');
 
-const ALL_OPERATION_METHODS = ['get', 'put', 'post', 'head', 'trace', 'patch', 'delete', 'options'] as const;
-const JSON_SCHEMA_META_2020_URL = 'https://json-schema.org/draft/2020-12/schema';
+const ALL_OPERATION_METHODS = [
+  'get',
+  'put',
+  'post',
+  'head',
+  'trace',
+  'patch',
+  'delete',
+  'options',
+] as const;
+const JSON_SCHEMA_META_2020_URL =
+  'https://json-schema.org/draft/2020-12/schema';
 const OPENAPI_SCHEMA_DEFINITIONS_REFERENCE_URI_BASE = '#/components/schemas/';
 export const SWAGGER_SCHEMA_FILENAME = 'swagger.schema.json';
 
@@ -60,13 +70,18 @@ function isReferenceObject(schema: unknown): schema is v31.ReferenceObject {
   return Object.hasOwn(schema as v31.ReferenceObject, '$ref');
 }
 
-function resolve<T>(document: v31.Document, reference: v31.ReferenceObject | T): T {
+function resolve<T>(
+  document: v31.Document,
+  reference: v31.ReferenceObject | T,
+): T {
   if (!isReferenceObject(reference)) {
     return reference;
   }
 
   const referencePointer = reference.$ref.slice(1);
-  const resolvedReference = pointer.get(document, referencePointer) as T | v31.ReferenceObject;
+  const resolvedReference = pointer.get(document, referencePointer) as
+    | T
+    | v31.ReferenceObject;
   return resolve(document, resolvedReference);
 }
 
@@ -95,29 +110,44 @@ function getRequestParametersSchema(
 
   const parametersSchema = Object.fromEntries(
     parameters.map((parameter) => [
-      parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name,
+      parameterType === 'header'
+        ? parameter.name.toLowerCase()
+        : parameter.name,
       parameter.schema ?? { type: 'string' as const },
     ]),
   );
   const requiredParameterNames = parameters
     .filter((parameter) => parameter.required === true)
-    .map((parameter) => (parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name));
+    .map((parameter) =>
+      parameterType === 'header'
+        ? parameter.name.toLowerCase()
+        : parameter.name,
+    );
   const schema: v31.SchemaObject = {
     type: 'object',
     // header parameters can have additional properties, we allow them in the runtime validation
     additionalProperties: parameterType === 'header',
     properties: parametersSchema,
-    ...(requiredParameterNames.length > 0 ? { required: requiredParameterNames } : {}),
+    ...(requiredParameterNames.length > 0
+      ? { required: requiredParameterNames }
+      : {}),
   };
   return schema;
 }
 
-function getBodySchema(contents: Record<string, v31.MediaTypeObject> | undefined): v31.SchemaObject | undefined {
+function getBodySchema(
+  contents: Record<string, v31.MediaTypeObject> | undefined,
+): v31.SchemaObject | undefined {
   const schema = Object.values(contents ?? {})[0]?.schema;
-  return schema !== undefined && Object.keys(schema).length > 0 ? schema : undefined;
+  return schema !== undefined && Object.keys(schema).length > 0
+    ? schema
+    : undefined;
 }
 
-function getRequestBodySchema(operation: v31.OperationObject, document: v31.Document) {
+function getRequestBodySchema(
+  operation: v31.OperationObject,
+  document: v31.Document,
+) {
   if (!Object.hasOwn(operation, 'requestBody')) {
     return {
       isRequestBodyRequired: false,
@@ -139,11 +169,26 @@ function getRequestContextSchema(
   document: v31.Document,
   apiSchemasBaseUri: string,
 ) {
-  const requestPathParametersSchema = getRequestParametersSchema(operation, 'path', document);
-  const requestQueryParametersSchema = getRequestParametersSchema(operation, 'query', document);
-  const requestHeadersSchema = getRequestParametersSchema(operation, 'header', document);
+  const requestPathParametersSchema = getRequestParametersSchema(
+    operation,
+    'path',
+    document,
+  );
+  const requestQueryParametersSchema = getRequestParametersSchema(
+    operation,
+    'query',
+    document,
+  );
+  const requestHeadersSchema = getRequestParametersSchema(
+    operation,
+    'header',
+    document,
+  );
 
-  const { requestBodySchema, isRequestBodyRequired } = getRequestBodySchema(operation, document);
+  const { requestBodySchema, isRequestBodyRequired } = getRequestBodySchema(
+    operation,
+    document,
+  );
   if (requestBodySchema !== undefined && !isRequestBodyAllowed(method)) {
     throw new Error(`Request body is not allowed for ${method} method`);
   }
@@ -155,9 +200,16 @@ function getRequestContextSchema(
     $id: `${apiSchemasBaseUri}/${responseContextSchemaName}`,
     type: 'object',
     properties: {
-      ...(requestPathParametersSchema ? { params: requestPathParametersSchema } : {}),
-      ...(requestQueryParametersSchema ? { query: requestQueryParametersSchema } : {}),
-      headers: requestHeadersSchema ?? { type: 'object', additionalProperties: true },
+      ...(requestPathParametersSchema
+        ? { params: requestPathParametersSchema }
+        : {}),
+      ...(requestQueryParametersSchema
+        ? { query: requestQueryParametersSchema }
+        : {}),
+      headers: requestHeadersSchema ?? {
+        type: 'object',
+        additionalProperties: true,
+      },
       ...(requestBodySchema ? { body: requestBodySchema } : {}),
     },
     required: [
@@ -173,7 +225,9 @@ function getRequestContextSchema(
 }
 
 function getResponseReason(status: string): string {
-  return status === 'default' ? `Default` : getReasonPhrase(status).replaceAll(/\s/gu, ''); // remove spaces
+  return status === 'default'
+    ? `Default`
+    : getReasonPhrase(status).replaceAll(/\s/gu, ''); // remove spaces
 }
 
 function getResponseBodySchema(response: v31.ResponseObject) {
@@ -189,10 +243,16 @@ function getResponseHeadersSchema(
   }
 
   const resolvedHeaders = Object.fromEntries(
-    Object.entries(headers).map(([name, header]) => [name.toLowerCase(), resolve(document, header)]),
+    Object.entries(headers).map(([name, header]) => [
+      name.toLowerCase(),
+      resolve(document, header),
+    ]),
   );
   const resolvedHeaderSchemas = Object.fromEntries(
-    Object.entries(resolvedHeaders).map(([name, header]) => [name, header.schema ?? { type: 'string' as const }]),
+    Object.entries(resolvedHeaders).map(([name, header]) => [
+      name,
+      header.schema ?? { type: 'string' as const },
+    ]),
   );
   const requiredHeaderNames = Object.entries(resolvedHeaders)
     .filter(([, header]) => header.required === true)
@@ -200,7 +260,9 @@ function getResponseHeadersSchema(
   return {
     type: 'object',
     properties: resolvedHeaderSchemas,
-    ...(requiredHeaderNames.length === 0 ? {} : { required: requiredHeaderNames }),
+    ...(requiredHeaderNames.length === 0
+      ? {}
+      : { required: requiredHeaderNames }),
   };
 }
 
@@ -213,7 +275,10 @@ function getResponseSchema(
 ) {
   const resolvedResponse = resolve(document, response);
   const responseBodySchema = getResponseBodySchema(resolvedResponse);
-  const responseHeadersSchema = getResponseHeadersSchema(resolvedResponse.headers, document);
+  const responseHeadersSchema = getResponseHeadersSchema(
+    resolvedResponse.headers,
+    document,
+  );
 
   const schemaName = `${operationId}Response${getResponseReason(status)}`;
   return {
@@ -221,11 +286,15 @@ function getResponseSchema(
     $id: `${apiSchemasBaseUri}/${schemaName}`,
     type: 'object',
     properties: {
-      headers: responseHeadersSchema ?? { type: 'object', additionalProperties: true },
+      headers: responseHeadersSchema ?? {
+        type: 'object',
+        additionalProperties: true,
+      },
       ...(responseBodySchema ? { body: responseBodySchema } : {}),
     },
     required: [
-      ...(responseHeadersSchema?.required !== undefined && responseHeadersSchema.required.length > 0
+      ...(responseHeadersSchema?.required !== undefined &&
+      responseHeadersSchema.required.length > 0
         ? ['headers']
         : []),
       ...(responseBodySchema ? ['body'] : []),
@@ -240,11 +309,20 @@ function getResponseContextSchemas(
   document: v31.Document,
   apiSchemasBaseUri: string,
 ) {
-  assert.ok(operation.responses !== undefined, 'Operation responses must be defined');
+  assert.ok(
+    operation.responses !== undefined,
+    'Operation responses must be defined',
+  );
   return Object.fromEntries(
     Object.entries(operation.responses).map(([status, response]) => [
       status.toLowerCase(),
-      getResponseSchema(status.toLowerCase(), response, document, apiSchemasBaseUri, operationId),
+      getResponseSchema(
+        status.toLowerCase(),
+        response,
+        document,
+        apiSchemasBaseUri,
+        operationId,
+      ),
     ]),
   );
 }
@@ -279,19 +357,35 @@ function updateOpenapiSchemaDefinitionsReferences(
   relativeSchemaDefinitionReferenceUri: string,
   key?: string,
 ): unknown {
-  if (typeof value === 'string' && key === '$ref' && value.startsWith(OPENAPI_SCHEMA_DEFINITIONS_REFERENCE_URI_BASE)) {
-    return value.replace(OPENAPI_SCHEMA_DEFINITIONS_REFERENCE_URI_BASE, relativeSchemaDefinitionReferenceUri);
+  if (
+    typeof value === 'string' &&
+    key === '$ref' &&
+    value.startsWith(OPENAPI_SCHEMA_DEFINITIONS_REFERENCE_URI_BASE)
+  ) {
+    return value.replace(
+      OPENAPI_SCHEMA_DEFINITIONS_REFERENCE_URI_BASE,
+      relativeSchemaDefinitionReferenceUri,
+    );
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => updateOpenapiSchemaDefinitionsReferences(item, relativeSchemaDefinitionReferenceUri));
+    return value.map((item) =>
+      updateOpenapiSchemaDefinitionsReferences(
+        item,
+        relativeSchemaDefinitionReferenceUri,
+      ),
+    );
   }
 
   if (typeof value === 'object' && value !== null) {
     return Object.fromEntries(
       Object.entries(value).map(([childKey, childValue]) => [
         childKey,
-        updateOpenapiSchemaDefinitionsReferences(childValue, relativeSchemaDefinitionReferenceUri, childKey),
+        updateOpenapiSchemaDefinitionsReferences(
+          childValue,
+          relativeSchemaDefinitionReferenceUri,
+          childKey,
+        ),
       ]),
     );
   }
@@ -316,7 +410,9 @@ function buildApiSchemaFromDocument(
   if (serverUri === undefined) {
     return undefined;
   }
-  const serverPathname = serverUri.startsWith('http') ? new URL(serverUri).pathname : serverUri;
+  const serverPathname = serverUri.startsWith('http')
+    ? new URL(serverUri).pathname
+    : serverUri;
   const endpointSchemasBaseUri = `https://${serviceName}.${organization}${serverPathname}/schemas`;
   const apiSchemasBaseUri = `${endpointSchemasBaseUri}/api`;
   const apiSchemas: Record<string, Record<string, OperationSchemas>> = {};
@@ -336,15 +432,32 @@ function buildApiSchemaFromDocument(
       if (operation !== undefined) {
         const operationFirehoseLogged = getFirehoseLoggedExtension(operation);
         log('operation firehose logged value', operationFirehoseLogged);
-        const effectiveFirehoseLogged = operationFirehoseLogged ?? documentFirehoseLogged;
+        const effectiveFirehoseLogged =
+          operationFirehoseLogged ?? documentFirehoseLogged;
         if (effectiveFirehoseLogged !== true) {
           continue;
         }
-        const operationId = getOperationId(path, method, operation, operationIds);
+        const operationId = getOperationId(
+          path,
+          method,
+          operation,
+          operationIds,
+        );
         operationIds.add(operationId);
         pathSchemas[method] = {
-          request: getRequestContextSchema(method, operation, operationId, document, apiSchemasBaseUri),
-          responses: getResponseContextSchemas(operation, operationId, document, apiSchemasBaseUri),
+          request: getRequestContextSchema(
+            method,
+            operation,
+            operationId,
+            document,
+            apiSchemasBaseUri,
+          ),
+          responses: getResponseContextSchemas(
+            operation,
+            operationId,
+            document,
+            apiSchemasBaseUri,
+          ),
         };
       }
     }
@@ -354,7 +467,11 @@ function buildApiSchemaFromDocument(
     allSchemas.definitions = Object.fromEntries(
       Object.entries(document.components.schemas).map(([name, schema]) => [
         name,
-        { $schema: JSON_SCHEMA_META_2020_URL, $id: `${endpointSchemasBaseUri}/definitions/${name}`, ...schema },
+        {
+          $schema: JSON_SCHEMA_META_2020_URL,
+          $id: `${endpointSchemasBaseUri}/definitions/${name}`,
+          ...schema,
+        },
       ]),
     );
   }
@@ -382,15 +499,25 @@ async function generateEndpointSchemas(
   root: string,
   endpoint: string,
 ): Promise<void> {
-  const documentContents = await fs.readFile(`${root}/${endpoint}/swagger.yml`, 'utf8');
+  const documentContents = await fs.readFile(
+    `${root}/${endpoint}/swagger.yml`,
+    'utf8',
+  );
   // eslint-disable-next-line import/no-named-as-default-member
   const document = (await jsYaml.load(documentContents)) as v31.Document;
-  const normalizedApiSchemas = buildApiSchemaFromDocument(document, organization, serviceName);
+  const normalizedApiSchemas = buildApiSchemaFromDocument(
+    document,
+    organization,
+    serviceName,
+  );
   if (normalizedApiSchemas === undefined) {
     return;
   }
   const swaggerSchemaFilename = `${root}/${endpoint}/${SWAGGER_SCHEMA_FILENAME}`;
-  await fs.writeFile(swaggerSchemaFilename, JSON.stringify(normalizedApiSchemas, undefined, 2));
+  await fs.writeFile(
+    swaggerSchemaFilename,
+    JSON.stringify(normalizedApiSchemas, undefined, 2),
+  );
   log(`Generated schema ${swaggerSchemaFilename}`);
 }
 
@@ -408,11 +535,19 @@ export async function generateSchemas(): Promise<void> {
 
   // assume that the package name is in the format of `@organization/service-name`
   const [organization, serviceName] = packageJson.name.slice(1).split('/');
-  assert.ok(organization !== undefined && serviceName !== undefined, 'Invalid package name');
+  assert.ok(
+    organization !== undefined && serviceName !== undefined,
+    'Invalid package name',
+  );
 
   await Promise.all(
     packageJson.service.api.endpoints.map((endpoint) =>
-      generateEndpointSchemas(organization, serviceName, packageJson.service.api.root, endpoint),
+      generateEndpointSchemas(
+        organization,
+        serviceName,
+        packageJson.service.api.root,
+        endpoint,
+      ),
     ),
   );
 }

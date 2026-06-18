@@ -1,5 +1,7 @@
 // athena/types.ts
 
+/* eslint-disable max-lines */
+
 // Type definitions for node-sql-parser 1.0
 // Project: https://github.com/taozhi8833998/node-sql-parser#readme
 // Definitions by: taozhi8833998 <https://github.com/taozhi8833998>
@@ -236,7 +238,16 @@ export interface Binary {
 
 export type Expr = Binary;
 
-export type ExpressionValue = ColumnRef | Param | Function | Case | AggrFunc | Value | Binary | Cast | Interval;
+export type ExpressionValue =
+  | ColumnRef
+  | Param
+  | Function
+  | Case
+  | AggrFunc
+  | Value
+  | Binary
+  | Cast
+  | Interval;
 
 export interface ExprList {
   type: 'expr_list';
@@ -258,7 +269,9 @@ export interface WindowSpec {
   window_frame_clause: string | null;
 }
 
-export type AsWindowSpec = string | { window_specification: WindowSpec; parentheses: boolean };
+export type AsWindowSpec =
+  | string
+  | { window_specification: WindowSpec; parentheses: boolean };
 
 export interface NamedWindowExpr {
   name: string;
@@ -279,7 +292,9 @@ export interface Select {
   columns: any[] | Column[];
   from: From[] | TableExpr | null;
   where: Binary | Function | null;
-  groupby: { columns: ColumnRef[] | undefined; modifiers: ValueExpr<string>[] } | undefined;
+  groupby:
+    | { columns: ColumnRef[] | undefined; modifiers: ValueExpr<string>[] }
+    | undefined;
   having: any[] | null;
   orderby: OrderBy[] | null;
   limit: Limit | null;
@@ -424,7 +439,13 @@ interface CreateIndexDefinition {
 interface CreateFulltextSpatialIndexDefinition {
   index?: string;
   definition: ColumnRef[];
-  keyword?: 'fulltext' | 'spatial' | 'fulltext key' | 'spatial key' | 'fulltext index' | 'spatial index';
+  keyword?:
+    | 'fulltext'
+    | 'spatial'
+    | 'fulltext key'
+    | 'spatial key'
+    | 'fulltext index'
+    | 'spatial index';
   index_options?: IndexOption[];
   resource: 'index';
 }
@@ -534,4 +555,14 @@ export interface Drop {
   name: any[];
 }
 
-export type AST = Use | Select | Insert_Replace | Update | Delete | Alter | Create | Drop;
+export type AST =
+  | Use
+  | Select
+  | Insert_Replace
+  | Update
+  | Delete
+  | Alter
+  | Create
+  | Drop;
+
+/* eslint-enable max-lines */

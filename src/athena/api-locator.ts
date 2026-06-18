@@ -4,7 +4,10 @@ import fs from 'node:fs';
 
 import debug from 'debug';
 
-import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-schema.ts';
+import {
+  type ApiSchemas,
+  generateSchemasForService,
+} from '../openapi/generate-schema.ts';
 
 const log = debug('eslint-athena-plugin:athena:api-locator');
 
@@ -18,13 +21,21 @@ export function locateApi(originalServiceName: string): ApiSchemas[] {
 
   let serviceName = originalServiceName;
   if (serviceName.endsWith(LEGACY_TABLE_SUFFIX)) {
-    log('service table is a legacy table name, looking for API schemas after removing "_logs" suffix', serviceName);
+    log(
+      'service table is a legacy table name, looking for API schemas after removing "_logs" suffix',
+      serviceName,
+    );
     serviceName = serviceName.slice(0, -LEGACY_TABLE_SUFFIX.length);
   }
 
-  const camelCaseServiceName = serviceName.replace(/-(?<letter>[a-z])/gu, (_, letter: string) => letter.toUpperCase());
+  const camelCaseServiceName = serviceName.replace(
+    /-(?<letter>[a-z])/gu,
+    (_, letter: string) => letter.toUpperCase(),
+  );
 
-  const allSchemaFilenames = fs.globSync(`${SERVICES_ROOT_FOLDER}/${camelCaseServiceName}/*/swagger.schema.deref.json`);
+  const allSchemaFilenames = fs.globSync(
+    `${SERVICES_ROOT_FOLDER}/${camelCaseServiceName}/*/swagger.schema.deref.json`,
+  );
   log(
     `${allSchemaFilenames.length.toString()} versions of API schemas located for service ${serviceName}`,
     allSchemaFilenames,
@@ -34,21 +45,34 @@ export function locateApi(originalServiceName: string): ApiSchemas[] {
 
   if (allSchemaFilenames.length > 0) {
     const hasStaleSchema = allSchemaFilenames.some(
-      (schemaFilename) => Date.now() - fs.statSync(schemaFilename).mtimeMs > SCHEMA_MAX_AGE_MS,
+      (schemaFilename) =>
+        Date.now() - fs.statSync(schemaFilename).mtimeMs > SCHEMA_MAX_AGE_MS,
     );
     if (hasStaleSchema) {
-      log('cached schema(s) are stale (older than 1 hour), regenerating for service', serviceName);
+      log(
+        'cached schema(s) are stale (older than 1 hour), regenerating for service',
+        serviceName,
+      );
       const regenerated = generateSchemasForService(serviceName, outputDir);
       if (regenerated.length > 0) {
         return regenerated.map(({ schema }) => schema);
       }
-      log('regeneration failed, falling back to stale cached schemas for service', serviceName);
+      log(
+        'regeneration failed, falling back to stale cached schemas for service',
+        serviceName,
+      );
     }
     return allSchemaFilenames.map(
-      (schemaFilename) => JSON.parse(fs.readFileSync(schemaFilename, 'utf-8')) as ApiSchemas,
+      (schemaFilename) =>
+        JSON.parse(fs.readFileSync(schemaFilename, 'utf-8')) as ApiSchemas,
     );
   }
 
-  log('no pre-generated schemas found, attempting on-demand generation for service', serviceName);
-  return generateSchemasForService(serviceName, outputDir).map(({ schema }) => schema);
+  log(
+    'no pre-generated schemas found, attempting on-demand generation for service',
+    serviceName,
+  );
+  return generateSchemasForService(serviceName, outputDir).map(
+    ({ schema }) => schema,
+  );
 }
