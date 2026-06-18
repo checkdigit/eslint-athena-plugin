@@ -43,7 +43,7 @@ jobs:
       - name: Publish Beta
         run: npm publish --tag beta
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN_PUBLISH }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_PUBLISH }}
       - name: Validate Published Beta NPM Package
         id: validate-npm-package
         uses: checkdigit/github-actions/validate-npm-package@main
