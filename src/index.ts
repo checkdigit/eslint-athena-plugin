@@ -26,34 +26,34 @@ const configs: Record<string, TSESLint.FlatConfig.Config[]> = {
     {
       files: ['**/*.ts'],
       plugins: {
-        '@checkdigit': plugin,
+        '@checkdigit-athena': plugin,
       },
       rules: {
-        [`@checkdigit/${athenaRuleId}`]: 'error',
+        [`@checkdigit-athena/${athenaRuleId}`]: 'error',
       },
     },
     {
       files: ['**/*.sql'],
-      plugins: { '@checkdigit': plugin },
+      plugins: { '@checkdigit-athena': plugin },
       languageOptions: { parser: { parseForESLint } },
-      rules: { [`@checkdigit/${sqlFileRuleId}`]: 'error' },
+      rules: { [`@checkdigit-athena/${sqlFileRuleId}`]: 'error' },
     },
   ],
   recommended: [
     {
       files: ['**/*.ts'],
       plugins: {
-        '@checkdigit': plugin,
+        '@checkdigit-athena': plugin,
       },
       rules: {
-        [`@checkdigit/${athenaRuleId}`]: 'off',
+        [`@checkdigit-athena/${athenaRuleId}`]: 'off',
       },
     },
     {
       files: ['**/*.sql'],
-      plugins: { '@checkdigit': plugin },
+      plugins: { '@checkdigit-athena': plugin },
       languageOptions: { parser: { parseForESLint } },
-      rules: { [`@checkdigit/${sqlFileRuleId}`]: 'off' },
+      rules: { [`@checkdigit-athena/${sqlFileRuleId}`]: 'off' },
     },
   ],
 };
