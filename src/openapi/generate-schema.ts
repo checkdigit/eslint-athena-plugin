@@ -101,7 +101,7 @@ function getRequestParametersSchema(
   );
   const requiredParameterNames = parameters
     .filter((parameter) => parameter.required === true)
-    .map((parameter) => parameter.name);
+    .map((parameter) => (parameterType === 'header' ? parameter.name.toLowerCase() : parameter.name));
   const schema: v31.SchemaObject = {
     type: 'object',
     // header parameters can have additional properties, we allow them in the runtime validation
@@ -156,7 +156,7 @@ function getRequestContextSchema(
     type: 'object',
     properties: {
       ...(requestPathParametersSchema ? { params: requestPathParametersSchema } : {}),
-      ...(requestQueryParametersSchema ? { params: requestQueryParametersSchema } : {}),
+      ...(requestQueryParametersSchema ? { query: requestQueryParametersSchema } : {}),
       headers: requestHeadersSchema ?? { type: 'object', additionalProperties: true },
       ...(requestBodySchema ? { body: requestBodySchema } : {}),
     },
@@ -266,7 +266,7 @@ function getOperationId(
     return operationId;
   }
 
-  // KISS, we could try to to come up with a better naming convension in case of name collision, but it's probably better to leave it to the service to decide a appropriate operationId
+  // KISS: we could try to come up with a better naming convention in case of name collisions, but it's probably better to leave it to the service to decide an appropriate operationId.
   let operationIdIndex = 1;
   while (operationIds.has(`${operationId}${operationIdIndex.toString()}`)) {
     operationIdIndex += 1;

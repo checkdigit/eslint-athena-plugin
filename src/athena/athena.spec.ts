@@ -413,7 +413,7 @@ WHERE p.p_to < v1.createdOn AND p.p_from >= v1.createdOn
       code: `\`select foo as bar from link when 1=1\``,
       errors: [
         {
-          messageId: 'SyntextError',
+          messageId: 'SyntaxError',
           data: { errorMessage: 'Expected [A-Za-z0-9_] but " " found.' },
           line: 1,
           column: 34,
@@ -430,7 +430,7 @@ FROM link
 WHEN 1=1\``,
       errors: [
         {
-          messageId: 'SyntextError',
+          messageId: 'SyntaxError',
           line: 4,
         },
       ],
@@ -440,7 +440,7 @@ WHEN 1=1\``,
       // Source: backtick at 0, srcStart=1.
       // start: 1+16=17 → line 1, 0-based col 17 → RuleTester col 18.
       // end:   1+30=31 → line 1, 0-based col 31 → RuleTester endCol 32.
-      name: 'unrecognised table name error location narrows to the table name in FROM',
+      name: 'unrecognized table name error location narrows to the table name in FROM',
       code: `\`SELECT url FROM "non-existent"\``,
       errors: [
         {
@@ -460,8 +460,7 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage:
-              "can't found column foo in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
+            errorMessage: `Column "foo" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
         },
       ],
@@ -473,8 +472,7 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage:
-              "can't found column nonExistentCol in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
           line: 1,
           column: 9,
@@ -489,7 +487,7 @@ WHEN 1=1\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: `unknown table or alias 'x'; known tables: eslint-athena-plugin` },
+          data: { errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin` },
           line: 1,
           column: 9,
           endLine: 1,
@@ -504,7 +502,7 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: m; available columns: url`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) m. Available columns: url`,
           },
         },
       ],
@@ -523,7 +521,8 @@ WHEN 1=1\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found responseheaders - $.foo; available properties: created-on, updated-on',
+            errorMessage:
+              'Column "responseheaders" has no property at path "$.foo"; available properties: created-on, updated-on',
           },
         },
       ],
@@ -585,7 +584,7 @@ WHEN 1=1\``,
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              'property not found responseheaders - $["Xupdated-on"]; available properties: created-on, updated-on',
+              'Column "responseheaders" has no property at path "$["Xupdated-on"]"; available properties: created-on, updated-on',
           },
         },
       ],
@@ -617,7 +616,7 @@ WHEN 1=1\``,
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              'property not found posting - $["XaccountId"]; available properties: amount, currency, type, createdOn, accountId',
+              'Column "posting" has no property at path "$["XaccountId"]"; available properties: amount, currency, type, createdOn, accountId',
           },
         },
       ],
@@ -644,7 +643,7 @@ AND (
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -662,7 +661,8 @@ WHERE method = 'PUT'
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.v1OnlyNewEntryProperty; available properties: postings',
+            errorMessage:
+              'Column "requestbody" has no property at path "$.v1OnlyNewEntryProperty"; available properties: postings',
           },
         },
       ],
@@ -682,7 +682,7 @@ WHERE method = 'PUT'
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.nonExistentField',
+            errorMessage: 'Column "requestbody" has no property at path "$.nonExistentField"',
           },
         },
       ],
@@ -701,7 +701,7 @@ WHERE method = 'PUT'
           messageId: 'AthenaError',
           data: {
             errorMessage:
-              'property not found responsebody - $.card.applicationTransactionCounter; available properties: encryptedDataEncryptionKey, card',
+              'Column "responsebody" has no property at path "$.card.applicationTransactionCounter"; available properties: encryptedDataEncryptionKey, card',
           },
         },
       ],
@@ -716,7 +716,7 @@ WHERE method = 'PUT'
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
           line: 1,
           column: 9,
           endLine: 1,
@@ -736,7 +736,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
           line: 2,
           column: 3,
           endLine: 2,
@@ -758,7 +758,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: 'property not found responsebody - $.nonExistentField' },
+          data: { errorMessage: 'Column "responsebody" has no property at path "$.nonExistentField"' },
           line: 1,
           column: 14,
           endLine: 1,
@@ -776,8 +776,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage:
-              "can't found column nonExistentCol in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
           line: 1,
           column: 9,
@@ -799,7 +798,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -821,7 +820,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -833,7 +832,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
           line: 1,
           column: 66,
@@ -854,7 +853,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -871,7 +870,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -889,7 +888,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -906,7 +905,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: 'property not found requestbody - $.xxx',
+            errorMessage: 'Column "requestbody" has no property at path "$.xxx"',
           },
         },
       ],
@@ -918,7 +917,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
         },
       ],
@@ -930,7 +929,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `unknown table or alias 'x'; known tables: l, r`,
+            errorMessage: `Table or alias "x" does not exist. Known tables: l, r`,
           },
         },
       ],
@@ -942,7 +941,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
         },
       ],
@@ -954,7 +953,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: s; available columns: url`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) s. Available columns: url`,
           },
         },
       ],
@@ -966,7 +965,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: c; available columns: url`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) c. Available columns: url`,
           },
         },
       ],
@@ -999,7 +998,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column nonExistentCol in tables: request_message; available columns: url, message`,
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) request_message. Available columns: url, message`,
           },
         },
       ],
@@ -1036,7 +1035,7 @@ FROM "eslint-athena-plugin" WHERE method = 'PUT' AND responsestatus = '200'\``,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: `can't found column ReportXXX in tables: report; available columns: Report`,
+            errorMessage: `Column "ReportXXX" does not exist in table(s) report. Available columns: Report`,
           },
         },
       ],

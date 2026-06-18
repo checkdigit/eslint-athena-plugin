@@ -12,14 +12,14 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 import { parse } from '../peggy/athena-peggy.ts';
 import type { AST } from './types';
 import { createRootContext } from './context.ts';
-import { ATHENA_ERROR, AthenaError, checkAthenaAst, offsetToLoc, SYNTEXT_ERROR } from './validate.ts';
+import { ATHENA_ERROR, AthenaError, checkAthenaAst, offsetToLoc, SYNTAXT_ERROR } from './validate.ts';
 
 export const ruleId = 'sql-file';
 
-const log = debug('eslint-plugin:sql-file');
+const log = debug('eslint-athena-plugin:sql-file');
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
-const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> = createRule({
+const rule: ESLintUtils.RuleModule<typeof SYNTAXT_ERROR | typeof ATHENA_ERROR> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
@@ -28,7 +28,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
     },
     schema: [],
     messages: {
-      [SYNTEXT_ERROR]: `SyntextError {{ errorMessage }}`,
+      [SYNTAXT_ERROR]: `SyntaxError {{ errorMessage }}`,
       [ATHENA_ERROR]: `AthenaError {{ errorMessage }}`,
     },
   },
@@ -58,13 +58,13 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
                 start: offsetToLoc(sql, pegLoc.start.offset),
                 end: offsetToLoc(sql, pegLoc.end.offset),
               },
-              messageId: SYNTEXT_ERROR,
+              messageId: SYNTAXT_ERROR,
               data: { errorMessage: (error as Error).message },
             });
           } else {
             context.report({
               loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 0 } },
-              messageId: SYNTEXT_ERROR,
+              messageId: SYNTAXT_ERROR,
               data: { errorMessage: (error as Error).message },
             });
           }

@@ -1,3 +1,5 @@
+// athena/index.ts
+
 import type { OpenAPIV3_1 as v3 } from 'openapi-types';
 
 export interface ServiceEndpoint {

@@ -37,7 +37,7 @@ import {
   type UnnestFrom,
 } from './visitor.ts';
 
-export const SYNTEXT_ERROR = 'SyntextError';
+export const SYNTAXT_ERROR = 'SyntaxError';
 export const ATHENA_ERROR = 'AthenaError';
 
 export class AthenaError extends Error {
@@ -60,7 +60,7 @@ export function offsetToLoc(text: string, offset: number): { line: number; colum
   return { line: lines.length, column: lines[lines.length - 1]?.length ?? 0 };
 }
 
-const log = debug('eslint-plugin:athena');
+const log = debug('eslint-athena-plugin:athena');
 const ANONYMOUS_TABLE = '<anonymous>';
 const SUBQUERY_TABLE = '<subquery>';
 
@@ -300,7 +300,7 @@ function extractUnnestMappings(select: Select): UnnestMapping[] {
 }
 
 // Resolves UNNEST source schema into target column entries.
-// When hasKnownApiOperation is true, an unrecognised schema type throws; otherwise unknown columns
+// When hasKnownApiOperation is true, an unrecognized schema type throws; otherwise unknown columns
 // are registered with an empty schema (the schema is an estimate for non-API sources).
 function buildUnnestColumnMap(
   fromColumn: string,
@@ -446,7 +446,7 @@ function resolveSchemaAtPath(
   if (extractedSchemas.length === 0) {
     throw new AthenaError(
       ATHENA_ERROR,
-      `property not found ${colRef} - ${propertyAccessor}${schemaPropertyHint(resolvedColumns)}`,
+      `Column "${colRef}" has no property at path "${propertyAccessor}"${schemaPropertyHint(resolvedColumns)}`,
       ast,
     );
   }
@@ -476,7 +476,7 @@ function navigateSchemaPath(
 function throwUnknownTableError(tableRef: string | undefined, colRef: string, ctx: VisitContext, ref: object): never {
   throw new AthenaError(
     ATHENA_ERROR,
-    `unknown table or alias '${tableRef ?? colRef}'; known tables: ${[...ctx.tables.keys()].join(', ')}`,
+    `Table or alias "${tableRef ?? colRef}" does not exist. Known tables: ${[...ctx.tables.keys()].join(', ')}`,
     ref,
   );
 }
@@ -504,7 +504,7 @@ function lookupColumnOrThrow(colRef: string, ref: object, referencedTables: Reso
     const availableCols = [...new Set(referencedTables.flatMap((table) => [...table.columns.keys()]))].join(', ');
     throw new AthenaError(
       ATHENA_ERROR,
-      `can't found column ${colRef} in tables: ${tableNames}; available columns: ${availableCols}`,
+      `Column "${colRef}" does not exist in table(s) ${tableNames}. Available columns: ${availableCols}`,
       ref,
     );
   }

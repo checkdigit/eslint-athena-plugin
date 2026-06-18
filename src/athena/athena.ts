@@ -12,11 +12,11 @@ import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from '@typescript-eslint/u
 import { parse } from '../peggy/athena-peggy.ts';
 import type { AST } from './types';
 import { createRootContext } from './context.ts';
-import { ATHENA_ERROR, AthenaError, checkAthenaAst, offsetToLoc, SYNTEXT_ERROR } from './validate.ts';
+import { ATHENA_ERROR, AthenaError, checkAthenaAst, offsetToLoc, SYNTAXT_ERROR } from './validate.ts';
 
 export const ruleId = 'athena';
 
-const log = debug('eslint-plugin:athena');
+const log = debug('eslint-athena-plugin:athena');
 const createRule = ESLintUtils.RuleCreator((name) => name);
 
 // Maps a SQL-string offset (as produced by the PEG parser) back to an absolute source offset.
@@ -61,7 +61,7 @@ function sqlOffsetToSource(sqlOffset: number, segments: SqlSourceSegment[]): num
 // ESLint rule
 // ---------------------------------------------------------------------------
 
-const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> = createRule({
+const rule: ESLintUtils.RuleModule<typeof SYNTAXT_ERROR | typeof ATHENA_ERROR> = createRule({
   name: ruleId,
   meta: {
     type: 'problem',
@@ -70,7 +70,7 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
     },
     schema: [],
     messages: {
-      [SYNTEXT_ERROR]: `SyntextError {{ errorMessage }}`,
+      [SYNTAXT_ERROR]: `SyntaxError {{ errorMessage }}`,
       [ATHENA_ERROR]: `AthenaError {{ errorMessage }}`,
     },
   },
@@ -97,13 +97,13 @@ const rule: ESLintUtils.RuleModule<typeof SYNTEXT_ERROR | typeof ATHENA_ERROR> =
               start: offsetToLoc(sourceText, sqlOffsetToSource(pegLoc.start.offset, sqlMapping)),
               end: offsetToLoc(sourceText, sqlOffsetToSource(pegLoc.end.offset, sqlMapping)),
             },
-            messageId: SYNTEXT_ERROR,
+            messageId: SYNTAXT_ERROR,
             data: { errorMessage: (error as Error).message },
           });
         } else {
           context.report({
             node: sqlNode,
-            messageId: SYNTEXT_ERROR,
+            messageId: SYNTAXT_ERROR,
             data: { errorMessage: (error as Error).message },
           });
         }

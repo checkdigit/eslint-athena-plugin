@@ -69,11 +69,11 @@ WHERE t1.method = 'GET'
   invalid: [
     {
       // PEG parser rejects "when"; the error is on line 1.
-      name: 'invalid SQL syntax reports a SyntextError',
+      name: 'invalid SQL syntax reports a SyntaxError',
       code: `select foo as bar from "eslint-athena-plugin" when 1=1`,
       errors: [
         {
-          messageId: 'SyntextError',
+          messageId: 'SyntaxError',
           data: { errorMessage: 'Expected [A-Za-z0-9_] but " " found.' },
           line: 1,
         },
@@ -88,7 +88,7 @@ FROM "eslint-athena-plugin"
 WHEN 1=1`,
       errors: [
         {
-          messageId: 'SyntextError',
+          messageId: 'SyntaxError',
           line: 4,
         },
       ],
@@ -120,8 +120,7 @@ WHEN 1=1`,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage:
-              "can't found column foo in tables: eslint-athena-plugin; available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date",
+            errorMessage: `Column "foo" does not exist in table(s) eslint-athena-plugin. Available columns: method, started, ended, url, requestbody, requestheaders, responsestatus, responsemessage, responsetype, responsebody, responseheaders, partition_date`,
           },
           line: 1,
           column: 8,
@@ -137,7 +136,7 @@ WHEN 1=1`,
         {
           messageId: 'AthenaError',
           data: {
-            errorMessage: "can't found column nonExistentCol in tables: m; available columns: url",
+            errorMessage: `Column "nonExistentCol" does not exist in table(s) m. Available columns: url`,
           },
         },
       ],
@@ -148,7 +147,7 @@ WHEN 1=1`,
       errors: [
         {
           messageId: 'AthenaError',
-          data: { errorMessage: `unknown table or alias 'x'; known tables: eslint-athena-plugin` },
+          data: { errorMessage: `Table or alias "x" does not exist. Known tables: eslint-athena-plugin` },
         },
       ],
     },

@@ -6,7 +6,7 @@ import type { SchemaObject } from 'ajv/dist/2020';
 import type { ApiSchemas, OperationSchemas } from '../openapi/generate-schema';
 import type { Binary, ColumnRefItem, Function as SqlFunction } from './types';
 
-const log = debug('eslint-plugin:athena:api-matcher');
+const log = debug('eslint-athena-plugin:athena:api-matcher');
 
 export interface OperationToMatch {
   path: string;

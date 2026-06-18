@@ -6,7 +6,7 @@ import debug from 'debug';
 
 import { type ApiSchemas, buildApiSchemaFromYaml } from './generate-schema.ts';
 
-const log = debug('eslint-plugin:athena:service-schema-generator');
+const log = debug('eslint-athena-plugin:athena:service-schema-generator');
 
 const ORGANIZATIONS = ['checkdigit'] as const;
 const SWAGGER_SCHEMA_DEREF_FILENAME = 'swagger.schema.deref.json';

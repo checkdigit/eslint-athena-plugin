@@ -34,7 +34,7 @@ npm run prepublishOnly
 
 ## Architecture
 
-This is an ESLint flat-config plugin (`@checkdigit/eslint-plugin`) that exports two named configs: `all` and `recommended`.
+This is an ESLint flat-config plugin (`@checkdigit/eslint-athena-plugin`) that exports two named configs: `all` and `recommended`.
 
 ### Rule structure
 

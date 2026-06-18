@@ -1,4 +1,5 @@
 // sql-parser.ts
+
 // Minimal ESLint-compatible parser for plain .sql files.
 // Produces a bare Program AST so rules can access the raw SQL via
 // context.getSourceCode().getText(). No tokens or scope analysis.

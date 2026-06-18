@@ -1,4 +1,4 @@
-// athena/zzz.spec.ts — unit tests for the walk() visitor dispatcher
+// athena/visitor.spec.ts
 
 import { strict as assert } from 'node:assert';
 

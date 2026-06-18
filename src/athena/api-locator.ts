@@ -6,7 +6,7 @@ import debug from 'debug';
 
 import { type ApiSchemas, generateSchemasForService } from '../openapi/generate-schema.ts';
 
-const log = debug('eslint-plugin:athena:api-locator');
+const log = debug('eslint-athena-plugin:athena:api-locator');
 
 const SERVICES_ROOT_FOLDER = 'src/services';
 const LEGACY_TABLE_SUFFIX = '_logs';
