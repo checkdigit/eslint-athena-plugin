@@ -1,0 +1,477 @@
+openapi: 3.0.0
+info:
+  title: Eslint Plugin Service
+  description: |
+    A service that accepts incoming pings. This is only used for testing.
+
+    © Check Digit LLC. 2019-2026
+  version: 1.0.0
+  contact:
+    name: Check Digit
+servers:
+  - url: /eslint-athena-plugin/v2
+tags:
+  - name: Service Health
+  - name: API
+
+x-firehose-logged: false
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Service Health
+      operationId: 'ping-get'
+      description: Tests the availability of the service and returns the current server time.
+      x-firehose-logged: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Ping'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/entry/{entryId}:
+    put:
+      tags:
+        - API
+      operationId: 'tenant-entry-put'
+      x-firehose-logged: true
+      description: >-
+        Creates a journal entry with a specific id. This operation is
+        idempotent.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/entryId'
+        - $ref: '#/components/parameters/ifMatch'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEntry'
+      responses:
+        '204':
+          $ref: '#/components/responses/Created'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreConditionFailed'
+        default:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - API
+      operationId: 'tenant-entry-get'
+      description: Obtains a journal entry with a specified id.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/entryId'
+        - $ref: '#/components/parameters/at'
+      responses:
+        '200':
+          description: Entry obtained successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEntry'
+          headers:
+            Created-On:
+              $ref: '#/components/headers/Created-On'
+            Updated-On:
+              $ref: '#/components/headers/Updated-On'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /tenant/{tenantId}/card/{cardId}:
+    get:
+      tags:
+        - API
+      operationId: 'card-get'
+      description: Retrieves a card by id.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/at'
+        - $ref: '#/components/parameters/publicKeyHashQuery'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/ServerError'
+    put:
+      x-firehose-logged: true
+      tags:
+        - API
+      operationId: 'card-put'
+      description: Creates a new card.
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - $ref: '#/components/parameters/cardId'
+        - $ref: '#/components/parameters/createdOn'
+      requestBody:
+        $ref: '#/components/requestBodies/NewCardRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CardResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    Ping:
+      type: object
+      additionalProperties: false
+      required:
+        - serverTime
+        - v2Only
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+          description: Current server time.
+        v2Only:
+          type: boolean
+          description: Indicates if the server is running in v2-only mode.
+
+    Error:
+      type: object
+      additionalProperties: false
+      description: Error message.
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          enum:
+            - INVALID AT
+            - INVALID FROM
+
+    Currency:
+      type: string
+      enum:
+        - AED
+        - AFN
+
+    ResponseEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - entryId
+        - createdOn
+        - postings
+      properties:
+        entryId:
+          type: string
+          description: Journal entry ID
+        createdOn:
+          type: string
+          format: date-time
+          description: Journal entry creation date/time
+        postings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponsePost'
+
+    NewEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - postings
+      properties:
+        postings:
+          type: array
+          description: List of posts contained within the journal entry.
+          items:
+            $ref: '#/components/schemas/Post'
+
+    Post:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+        - type
+        - createdOn
+        - accountId
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/Currency'
+        type:
+          $ref: '#/components/schemas/Type'
+        createdOn:
+          type: string
+          format: date-time
+        accountId:
+          type: string
+          description: account ID
+
+    ResponsePost:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+        - currency
+        - type
+        - accountId
+        - createdOn
+      properties:
+        amount:
+          type: string
+        currency:
+          $ref: '#/components/schemas/Currency'
+        type:
+          $ref: '#/components/schemas/Type'
+        createdOn:
+          type: string
+          format: date-time
+        accountId:
+          type: string
+          description: account ID
+
+    Type:
+      type: string
+      description: CREDIT or DEBIT
+      enum:
+        - CREDIT
+        - DEBIT
+
+    CardId:
+      type: string
+      description: Card identifier
+      format: uuid
+
+    Hash:
+      type: string
+      format: uuid
+      example: '15a85f64-5717-4562-b3fc-2c963f66afa6'
+      description: UUID derived using @checkdigit/hash
+
+    CardResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - dataEncryptionKeyId
+        - storageKeyId
+        - card
+      properties:
+        encryptedDataEncryptionKey:
+          description: |
+            Encrypted DEK matching the publicKeyHash sent in the request. Used to decrypt values in the Card object.
+          type: string
+        card:
+          $ref: '#/components/schemas/Card'
+
+    Card:
+      type: object
+      additionalProperties: false
+      required:
+        - last4
+        - cardNumber
+      properties:
+        last4:
+          type: string
+          pattern: '^\d+$'
+          description: Last four digits of the card number
+          minLength: 4
+          maxLength: 4
+        cardNumber:
+          type: string
+          description: Encrypted card number (PAN)
+
+    NewCardRequest:
+      type: object
+      required:
+        - dataEncryptionKeyId
+        - cardNumberLength
+        - newCard
+      additionalProperties: false
+      properties:
+        dataEncryptionKeyId:
+          $ref: '#/components/schemas/DataEncryptionKeyId'
+        cardNumberLength:
+          type: integer
+          description: Desired number of digits in the card number.
+          minimum: 15
+          maximum: 19
+        newCard:
+          $ref: '#/components/schemas/NewCard'
+
+    DataEncryptionKeyId:
+      type: string
+      description: |
+        Reference to encryption keys Payment Card Service will use to encrypt the Card object.
+      format: uuid
+
+    NewCard:
+      type: object
+      additionalProperties: false
+      required:
+        - serviceCode
+        - sequenceNumber
+      properties:
+        serviceCode:
+          type: string
+          pattern: '^\d+$'
+          description: |
+            Used to set general guidelines for how the card can be used, e.g. domestic only or international, online authorizations only, etc.
+          minLength: 3
+          maxLength: 3
+        sequenceNumber:
+          type: integer
+          description: Used to differentiate issuing the same card and expiration date on multiple plastics.
+          minimum: 0
+          maximum: 10
+
+  parameters:
+    tenantId:
+      in: path
+      name: tenantId
+      description: Specifies tenant of Ledger service
+      required: true
+      schema:
+        type: string
+
+    ifMatch:
+      in: header
+      name: If-Match
+      description: If-Match header
+      schema:
+        type: string
+
+    at:
+      in: query
+      name: at
+      description: Returns data createdOn before this time.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    entryId:
+      in: path
+      name: entryId
+      description: Unique identifier for an entry.
+      required: true
+      schema:
+        type: string
+
+    createdOn:
+      in: header
+      name: Created-On
+      description: used to set resource creation date.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    cardId:
+      name: cardId
+      in: path
+      description: An id unique to each card in uuid format
+      required: true
+      schema:
+        $ref: '#/components/schemas/CardId'
+
+    publicKeyHashQuery:
+      name: publicKeyHashQuery
+      in: query
+      description: UUID derived from a PEM formatted Public Key using @checkdigit/hash
+      required: false
+      schema:
+        $ref: '#/components/schemas/Hash'
+
+  requestBodies:
+    NewCardRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewCardRequest'
+
+  responses:
+    Ping:
+      description: ping successful response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+    ServerError:
+      description: Server Error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Requested resource not found.
+
+    Conflict:
+      description: Conflict
+
+    PreConditionFailed:
+      description: Version tag mismatch
+
+    Created:
+      description: Created.
+      headers:
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+
+    CardResponse:
+      description: Card retrieved
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CardResponse'
+      headers:
+        Last-Modified:
+          $ref: '#/components/headers/Last-Modified'
+        Created-On:
+          $ref: '#/components/headers/Created-On'
+        Updated-On:
+          $ref: '#/components/headers/Updated-On'
+        ETag:
+          $ref: '#/components/headers/ETag'
+
+  headers:
+    Created-On:
+      description: When the resource was created.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Updated-On:
+      description: The updated-on timestamp for the existing record.
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    Last-Modified:
+      description: When the resource was created (all resources are immutable).
+      required: true
+      schema:
+        type: string
+        format: date-time
+
+    ETag:
+      description: Version information for record
+      required: true
+      schema:
+        type: string

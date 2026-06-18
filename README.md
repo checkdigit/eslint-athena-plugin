@@ -1,35 +1,32 @@
-# Check Digit < Insert name > Library
+# @checkdigit/eslint-plugin
 
-Copyright (c) 2026 [Check Digit, LLC](https://checkdigit.com)
+Copyright (c) 2021-2024 [Check Digit, LLC](https://checkdigit.com)
 
-The Check Digit < Insert Name > library is a library for Check Digit services to deal with < short description about what the library does >
+## Rules
 
-Features:
+- `@checkdigit/no-card-numbers`
+- `@checkdigit/file-path-comment`
+- `@checkdigit/no-random-v4-uuid`
+- `@checkdigit/no-uuid`
+- `@checkdigit/require-strict-assert`
+- `@checkdigit/no-wallaby-comment`
+- `@checkdigit/regular-expression-comment`
+- `@checkdigit/require-assert-predicate-rejects-throws`
+- `@checkdigit/object-literal-response`
+- `@checkdigit/no-test-import`
+- `@checkdigit/no-side-effects`
+- `@checkdigit/no-promise-instance-method`
+- `@checkdigit/invalid-json-stringify`
+- `@checkdigit/no-legacy-service-typing`
+- `@checkdigit/require-resolve-full-response`
+- `@checkdigit/require-type-out-of-type-only-imports`
+- `@checkdigit/require-ts-extension-imports`
+- `@checkdigit/no-enum`
 
-- Feature 1
-- Feature 2
-- Feature3
-- (...)
+## Configurations
 
-## Install
-
-`npm install @checkdigit/< Insert name >`
-
-## Use
-
-It could be. i.e.
-
-```ts
-import * as insertName from '@checkdigit/< Insert name >';
-
-const someVariable = insertName();
-```
-
-Or if it can be called as a script. i.e.
-
-```bash
-insert-name -b src/package.json
-```
+- `@checkdigit/all`
+- `@checkdigit/recommended`
 
 ## License
 
