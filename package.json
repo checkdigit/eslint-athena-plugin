@@ -1,10 +1,11 @@
 {
   "name": "@checkdigit/eslint-athena-plugin",
   "version": "1.0.0",
+  "private": false,
   "description": "Check Digit eslint plugins to enforce best practices for projects using Athena SQL.",
   "keywords": [
     "eslint",
-    "eslintplugin"
+    "athena"
   ],
   "homepage": "https://github.com/checkdigit/eslint-athena-plugin#readme",
   "bugs": {
