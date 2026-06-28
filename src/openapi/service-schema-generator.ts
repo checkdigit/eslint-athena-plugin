@@ -1,6 +1,7 @@
 // openapi/service-schema-generator.ts
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { strict as assert } from 'node:assert';
 
 import debug from 'debug';
 
@@ -8,7 +9,6 @@ import { type ApiSchemas, buildApiSchemaFromYaml } from './generate-schema.ts';
 
 const log = debug('eslint-athena-plugin:athena:service-schema-generator');
 
-const ORGANIZATIONS = ['checkdigit'] as const;
 const SWAGGER_SCHEMA_DEREF_FILENAME = 'swagger.schema.deref.json';
 
 function errorMessageFromError(error: unknown): string {
@@ -157,28 +157,53 @@ function findServiceInProject(serviceName: string): ServiceSource | undefined {
 function findServiceInNodeModules(
   serviceName: string,
 ): ServiceSource | undefined {
-  for (const org of ORGANIZATIONS) {
-    const serviceFolder = `node_modules/@${org}/${serviceName}`;
+  const projectPackageJson = JSON.parse(
+    readFileSync('./package.json', 'utf-8'),
+  ) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+    optionalDependencies?: Record<string, string>;
+  };
+
+  const allDependencies = {
+    ...projectPackageJson.dependencies,
+    ...projectPackageJson.devDependencies,
+    ...projectPackageJson.peerDependencies,
+    ...projectPackageJson.optionalDependencies,
+  };
+
+  const matchingPackages = [
+    ...new Set(
+      Object.keys(allDependencies).filter((packageName) => {
+        const match = /^@(?<org>[^/]+)\/(?<name>.+)$/u.exec(packageName);
+        return match?.groups?.['name'] === serviceName;
+      }),
+    ),
+  ];
+
+  for (const scopedPackageName of matchingPackages) {
+    const serviceFolder = `node_modules/${scopedPackageName}`;
+    const org = scopedPackageName.slice(1).split('/')[0];
+    assert.ok(org !== undefined, 'organization must be defined');
     if (!existsSync(serviceFolder)) {
-      log(
-        `[schema-generator] not found in node_modules: @${org}/${serviceName}`,
-      );
+      log(`[schema-generator] not found in node_modules: ${scopedPackageName}`);
       continue;
     }
     try {
       log(
-        `[schema-generator] found in node_modules: @${org}/${serviceName}, reading swagger files`,
+        `[schema-generator] found in node_modules: ${scopedPackageName}, reading swagger files`,
       );
       const source = findServiceLocally(serviceFolder, org, serviceName);
       if (source !== undefined) {
         return source;
       }
       log(
-        `[schema-generator] no swagger schema inside node_modules/@${org}/${serviceName}`,
+        `[schema-generator] no swagger schema inside node_modules/${scopedPackageName}`,
       );
     } catch (error) {
       log(
-        `[schema-generator] error reading node_modules/@${org}/${serviceName}: ${errorMessageFromError(error)}`,
+        `[schema-generator] error reading node_modules/${scopedPackageName}: ${errorMessageFromError(error)}`,
       );
     }
   }
