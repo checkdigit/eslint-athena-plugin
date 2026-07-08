@@ -1,0 +1,1 @@
+This rule requires that all referenced tables are valid Athena tables associated with services, and that all referenced columns/properties are valid according to the service OpenAPI schema definitions.
