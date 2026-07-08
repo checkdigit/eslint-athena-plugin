@@ -31,7 +31,7 @@ jobs:
           mv coverage coverage-pr
           git fetch
           git checkout origin/${{ github.event.pull_request.base.ref }}
-          npm ci --ignore-scripts && npm run ci:coverage
+          npm ci --ignore-scripts && npm run prepare && npm run ci:coverage
       - name: Post Coverage Report
         uses: checkdigit/github-actions/coverage-reporter@main
         with:

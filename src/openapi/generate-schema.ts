@@ -80,8 +80,7 @@ function resolve<T>(
 
   const referencePointer = reference.$ref.slice(1);
   const resolvedReference = pointer.get(document, referencePointer) as
-    | T
-    | v31.ReferenceObject;
+    T | v31.ReferenceObject;
   return resolve(document, resolvedReference);
 }
 

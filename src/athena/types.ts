@@ -1,7 +1,5 @@
 // athena/types.ts
 
-/* eslint-disable max-lines */
-
 // Type definitions for node-sql-parser 1.0
 // Project: https://github.com/taozhi8833998/node-sql-parser#readme
 // Definitions by: taozhi8833998 <https://github.com/taozhi8833998>
@@ -270,8 +268,7 @@ export interface WindowSpec {
 }
 
 export type AsWindowSpec =
-  | string
-  | { window_specification: WindowSpec; parentheses: boolean };
+  string | { window_specification: WindowSpec; parentheses: boolean };
 
 export interface NamedWindowExpr {
   name: string;
@@ -556,13 +553,4 @@ export interface Drop {
 }
 
 export type AST =
-  | Use
-  | Select
-  | Insert_Replace
-  | Update
-  | Delete
-  | Alter
-  | Create
-  | Drop;
-
-/* eslint-enable max-lines */
+  Use | Select | Insert_Replace | Update | Delete | Alter | Create | Drop;

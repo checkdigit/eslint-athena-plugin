@@ -1,7 +1,6 @@
 {
   "extends": "@checkdigit/typescript-config",
   "compilerOptions": {
-    "noEmit": true,
-    "skipLibCheck": true
+    "noEmit": true
   }
 }
