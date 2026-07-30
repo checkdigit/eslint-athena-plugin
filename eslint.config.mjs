@@ -151,20 +151,6 @@ export default [
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
-    },
-  },
-  {
-    // These specs run tests via RuleTester.run(...), a pattern the rule's static
-    // analysis doesn't recognize as containing tests.
-    files: ['**/*.spec.ts'],
-    rules: {
-      'sonarjs/no-empty-test-file': 'off',
-    },
-  },
-  {
-    // Factory helpers that export a RuleTester, not test suites themselves.
-    files: ['src/tester.test.ts', 'src/ts-tester.test.ts'],
-    rules: {
       'sonarjs/no-empty-test-file': 'off',
     },
   },
