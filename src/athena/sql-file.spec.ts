@@ -1,9 +1,19 @@
 // athena/sql-file.spec.ts
 
+import { after, describe, it } from 'node:test';
+
 import { RuleTester } from '@typescript-eslint/rule-tester';
 
 import { parseForESLint } from '../sql-parser.ts';
 import rule, { ruleId } from './sql-file.ts';
+
+RuleTester.afterAll = after;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+RuleTester.describe = describe;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+RuleTester.it = it;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises, no-only-tests/no-only-tests
+RuleTester.itOnly = it.only;
 
 // The code in each test case is the raw SQL text — the entire "file" content.
 // Column offsets are 1-based. Because there is no wrapping backtick (unlike the

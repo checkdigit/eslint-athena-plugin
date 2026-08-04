@@ -1,8 +1,8 @@
 // service.ts
 
-import ts from 'typescript';
+import type { Type } from 'typescript';
 
-export function isServiceResponse(type: ts.Type): boolean {
+export function isServiceResponse(type: Type): boolean {
   return (
     type.getProperties().some((symbol) => symbol.name === 'status') &&
     type.getProperties().some((symbol) => symbol.name === 'headers') &&

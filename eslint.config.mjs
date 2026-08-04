@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs';
 
 import ts from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
-import importPlugin from 'eslint-plugin-import';
+import importX from 'eslint-plugin-import-x';
 import noOnlyTests from 'eslint-plugin-no-only-tests';
 import noSecrets from 'eslint-plugin-no-secrets';
 import eslintPlugin from 'eslint-plugin-eslint-plugin';
@@ -29,10 +29,10 @@ export default [
   ...ts.configs.strictTypeChecked,
   ...ts.configs.stylisticTypeChecked,
   sonarjs.configs.recommended,
-  importPlugin.flatConfigs.recommended,
-  importPlugin.flatConfigs.typescript,
+  importX.flatConfigs.recommended,
+  importX.flatConfigs.typescript,
   prettier,
-  eslintPlugin.configs['flat/recommended'],
+  eslintPlugin.configs.recommended,
   {
     plugins: {
       'no-only-tests': noOnlyTests,
@@ -47,7 +47,7 @@ export default [
       },
     },
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         typescript: {
           // unrs-resolver (used by v4) fails to parse @checkdigit/typescript-config's .mjs
           // file as JSON when following tsconfig `extends`. Use a flat resolver tsconfig instead.
@@ -126,7 +126,7 @@ export default [
           ignoreDeclarationSort: true,
         },
       ],
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           'newlines-between': 'ignore',
@@ -150,6 +150,8 @@ export default [
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      'sonarjs/no-empty-test-file': 'off',
     },
   },
 ];

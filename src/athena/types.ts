@@ -9,6 +9,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 
+export type WhereClause = Binary | Function | null;
+
 export interface With {
   name: { value: string };
   stmt: {
@@ -288,7 +290,7 @@ export interface Select {
   distinct: 'DISTINCT' | null;
   columns: any[] | Column[];
   from: From[] | TableExpr | null;
-  where: Binary | Function | null;
+  where: WhereClause;
   groupby:
     | { columns: ColumnRef[] | undefined; modifiers: ValueExpr<string>[] }
     | undefined;
@@ -305,7 +307,7 @@ export interface Select {
   _next?: Select;
   set_op?: string;
 }
-export interface Insert_Replace {
+export interface InsertReplace {
   type: 'replace' | 'insert';
   table: any;
   columns: string[] | null;
@@ -323,14 +325,14 @@ export interface Update {
   db: string | null;
   table: (From | Dual)[] | null;
   set: SetList[];
-  where: Binary | Function | null;
+  where: WhereClause;
   loc?: LocationRange;
 }
 export interface Delete {
   type: 'delete';
   table: any;
   from: (From | Dual)[];
-  where: Binary | Function | null;
+  where: WhereClause;
   loc?: LocationRange;
 }
 
@@ -553,4 +555,4 @@ export interface Drop {
 }
 
 export type AST =
-  Use | Select | Insert_Replace | Update | Delete | Alter | Create | Drop;
+  Use | Select | InsertReplace | Update | Delete | Alter | Create | Drop;

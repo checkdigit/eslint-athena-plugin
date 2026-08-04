@@ -533,6 +533,7 @@ function resolveSchemaAtPath(
   ast?: object,
 ): SchemaObject[] {
   // Double-dot handles allOf / anyOf / oneOf wrappers that may appear in the schema.
+  // eslint-disable-next-line sonarjs/single-character-alternation
   const adjustedPath = `$.${propertyAccessor.substring(1).replace(/(?<sep>\.|\[)/gu, '..properties$<sep>')}`;
   log('adjusted path', adjustedPath);
 

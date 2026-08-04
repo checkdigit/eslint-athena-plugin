@@ -176,6 +176,7 @@ function findServiceInNodeModules(
   const matchingPackages = [
     ...new Set(
       Object.keys(allDependencies).filter((packageName) => {
+        // eslint-disable-next-line sonarjs/unused-named-groups
         const match = /^@(?<org>[^/]+)\/(?<name>.+)$/u.exec(packageName);
         return match?.groups?.['name'] === serviceName;
       }),

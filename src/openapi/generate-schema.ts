@@ -6,7 +6,7 @@ import { promises as fs } from 'node:fs';
 import debug from 'debug';
 import { getReasonPhrase } from 'http-status-codes';
 import pointer from 'json-pointer';
-import jsYaml from 'js-yaml';
+import * as jsYaml from 'js-yaml';
 import type { OpenAPIV3_1 as v31 } from 'openapi-types';
 import type { SchemaObject } from 'ajv/dist/2020';
 
@@ -193,7 +193,6 @@ function getRequestContextSchema(
   }
 
   const responseContextSchemaName = `${operationId}RequestContext`;
-  // eslint-disable-next-line sonarjs/prefer-immediate-return
   const requestContextSchema = {
     $schema: JSON_SCHEMA_META_2020_URL,
     $id: `${apiSchemasBaseUri}/${responseContextSchemaName}`,
@@ -336,7 +335,9 @@ function getOperationId(
   const parts = operationIdBase.split(/[-=/]/u); // split operationId into parts by -, =, or /
 
   const operationId = parts
-    .filter((part) => part.trim() !== '' && !/\{.*\}/u.test(part)) // keep only non-empty parts that are not path parameters
+    // keep only non-empty parts that are not path parameters
+    // eslint-disable-next-line sonarjs/super-linear-regex -- operates on a trusted, build-time OpenAPI path string, not user input
+    .filter((part) => part.trim() !== '' && !/\{.*\}/u.test(part))
     .map((part) => `${part[0]?.toUpperCase() ?? ''}${part.slice(1)}`)
     .join('');
   if (!operationIds.has(operationId)) {
@@ -422,6 +423,7 @@ function buildApiSchemaFromDocument(
 
   for (const [path, pathItems] of Object.entries(document.paths)) {
     // convert openapi path to koa router path, e.g. "/user/{userId}" --> "/user/:userId"
+    // eslint-disable-next-line sonarjs/super-linear-regex -- operates on a trusted, build-time OpenAPI path string, not user input
     const koaPath = path.replaceAll(/\{(?<param>[^}]+)\}/gu, ':$<param>');
     const pathSchemas: Record<string, OperationSchemas> = {};
     apiSchemas[`${serverPathname}${koaPath}`] = pathSchemas;
@@ -487,7 +489,6 @@ export function buildApiSchemaFromYaml(
   organization: string,
   serviceName: string,
 ): ApiSchemas | undefined {
-  // eslint-disable-next-line import/no-named-as-default-member
   const document = jsYaml.load(yamlContent) as v31.Document;
   return buildApiSchemaFromDocument(document, organization, serviceName);
 }
@@ -502,7 +503,6 @@ async function generateEndpointSchemas(
     `${root}/${endpoint}/swagger.yml`,
     'utf8',
   );
-  // eslint-disable-next-line import/no-named-as-default-member
   const document = (await jsYaml.load(documentContents)) as v31.Document;
   const normalizedApiSchemas = buildApiSchemaFromDocument(
     document,
