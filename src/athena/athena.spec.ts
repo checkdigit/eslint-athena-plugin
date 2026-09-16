@@ -1,9 +1,28 @@
 // athena/athena.spec.ts
 
-import createTester from '../ts-tester.test.ts';
+import { after, describe, it } from 'node:test';
+
+import { RuleTester } from '@typescript-eslint/rule-tester';
+
 import rule, { ruleId } from './athena.ts';
-// file.only
-createTester().run(ruleId, rule, {
+
+// register node:test hooks here for Wallaby compatibility
+RuleTester.afterAll = after;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+RuleTester.describe = describe;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
+RuleTester.it = it;
+// eslint-disable-next-line @typescript-eslint/no-misused-promises, no-only-tests/no-only-tests
+RuleTester.itOnly = it.only;
+
+new RuleTester({
+  languageOptions: {
+    parserOptions: {
+      project: '../tsconfig.json',
+      tsconfigRootDir: `${process.cwd()}/ts-init`,
+    },
+  },
+}).run(ruleId, rule, {
   valid: [
     {
       name: 'non-sql',
